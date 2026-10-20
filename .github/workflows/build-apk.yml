@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,9 +49,32 @@ jobs:
           cd android
           ./gradlew assembleDebug --stacktrace
 
+      - name: Prepare APK for Release
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Syeril-Portofolio.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Syeril-Portfolio-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: Syeril-Portofolio.apk
           retention-days: 14
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "v1.0.0 - M. Syeril Portfolio Mobile App"
+          body: |
+            ## 📱 M. Syeril Portfolio - Android App (APK)
+
+            Aplikasi portofolio interaktif dengan animasi 3D Three.js "Syeril", dibangun menggunakan Vue 3 dan Capacitor.
+
+            ### 📥 Cara Pasang di HP:
+            1. Klik dan download file **`Syeril-Portofolio.apk`** di bawah.
+            2. Buka file `.apk` di HP Android kamu.
+            3. Pilih **Install** (izinkan instalasi dari browser jika diminta).
+            4. Buka aplikasinya dan nikmati tampilan 3D-nya! ✨
+          files: Syeril-Portofolio.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
